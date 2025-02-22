@@ -1,7 +1,7 @@
 # ION Workout App Installer
 
 ## Repository Homepage
-For more details about the ION Workout App Installer, visit [the homepage](https://github.com/ION-WorkoutApp)
+For more details about the actual app, visit [the homepage](https://github.com/ION-WorkoutApp)
 
 ---
 
