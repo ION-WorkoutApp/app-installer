@@ -35,7 +35,7 @@ import java.io.IOException
 class InstallerViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
     private val targetPackageName = "com.ion606.workoutapp"
-    private val _uiState = MutableStateFlow(InstallerUiState(targetPackageName=targetPackageName))
+    private val _uiState = MutableStateFlow(InstallerUiState(targetPackageName = targetPackageName))
     val uiState: StateFlow<InstallerUiState> = _uiState.asStateFlow()
 
     init {
@@ -64,8 +64,7 @@ class InstallerViewModel(application: Application) : AndroidViewModel(applicatio
 
                 _uiState.update {
                     it.copy(
-                        installProgress = null,
-                        errorMessage = null
+                        installProgress = null, errorMessage = null
                     )
                 }
             } catch (e: Exception) {
@@ -77,14 +76,11 @@ class InstallerViewModel(application: Application) : AndroidViewModel(applicatio
     @RequiresApi(Build.VERSION_CODES.P)
     private fun checkInstalledVersion() {
         try {
-            val packageInfo = context.packageManager.getPackageInfo(targetPackageName, PackageManager.GET_PROVIDERS);
-            Log.d("installer", "found package: ${packageInfo.versionName}");
-            val signatureOk = verifySignature(context, targetPackageName);
-            Log.d("installer", "signature verification: $signatureOk");
+            val packageInfo = context.packageManager.getPackageInfo(
+                targetPackageName, PackageManager.GET_ACTIVITIES
+            );
 
-            if (!signatureOk) {
-                throw SecurityException("signature mismatch with existing installation");
-            }
+            Log.d("installer", "found package: ${packageInfo.versionName}");
 
             _uiState.update {
                 it.copy(
@@ -98,7 +94,24 @@ class InstallerViewModel(application: Application) : AndroidViewModel(applicatio
                 throw SecurityException("Signature mismatch with existing installation")
             }
         } catch (e: PackageManager.NameNotFoundException) {
+            // Handle "not installed" case
+            Log.d("installer", "package not found: $targetPackageName");
             _uiState.update { it.copy(isInstalled = false, installedVersion = null) }
+        } catch (e: SecurityException) {
+            Log.d("installer", "package signature mismatch: $targetPackageName");
+
+            // Handle signature mismatch
+            _uiState.update {
+                it.copy(
+                    errorMessage = "Signature mismatch with installed app",
+                    isInstalled = true,
+                    updateAvailable = true // I'm treating mismatch as an update
+                )
+            }
+        } catch (e: Exception) {
+            // Catch other unexpected errors
+            Log.e("Installer", "Detection failed: ${e.message}")
+            _uiState.update { it.copy(errorMessage = "Detection error: ${e.message}") }
         }
     }
 
@@ -109,14 +122,15 @@ class InstallerViewModel(application: Application) : AndroidViewModel(applicatio
                 val releases = GitHubAPI.getLatestRelease()
                 releases?.firstOrNull()?.let { release ->
                     val formattedVersion = formatVersion(release.tag_name)
+                    Log.d("installer", "latest release: $formattedVersion");
+
                     _uiState.update {
                         it.copy(
                             latestVersion = formattedVersion,
                             changelog = release.body,
                             downloadURL = release.assets.firstOrNull()?.browser_download_url,
                             updateAvailable = isUpdateAvailable(
-                                it.installedVersion,
-                                formattedVersion
+                                it.installedVersion, formattedVersion
                             ),
                             isLoading = false,
                             errorMessage = null
@@ -187,11 +201,9 @@ class InstallerViewModel(application: Application) : AndroidViewModel(applicatio
 
     private fun handleInstallationError(e: Exception) {
         val errorMessage = when {
-            e.message?.contains("conflicting provider") == true ->
-                "Uninstall existing app first"
+            e.message?.contains("conflicting provider") == true -> "Uninstall existing app first"
 
-            e is PackageManager.NameNotFoundException ->
-                "Installation failed - signature mismatch"
+            e is PackageManager.NameNotFoundException -> "Installation failed - signature mismatch"
 
             else -> "Installation failed: ${e.message}"
         }
@@ -203,8 +215,7 @@ class InstallerViewModel(application: Application) : AndroidViewModel(applicatio
 
         _uiState.update {
             it.copy(
-                errorMessage = errorMessage,
-                installProgress = null
+                errorMessage = errorMessage, installProgress = null
             )
         }
     }
@@ -212,8 +223,7 @@ class InstallerViewModel(application: Application) : AndroidViewModel(applicatio
     private fun handleNoReleasesFound() {
         _uiState.update {
             it.copy(
-                errorMessage = "No releases found",
-                isLoading = false
+                errorMessage = "No releases found", isLoading = false
             )
         }
     }
@@ -221,8 +231,7 @@ class InstallerViewModel(application: Application) : AndroidViewModel(applicatio
     private fun handleFetchError(e: Exception) {
         _uiState.update {
             it.copy(
-                errorMessage = "Failed to fetch updates: ${e.message}",
-                isLoading = false
+                errorMessage = "Failed to fetch updates: ${e.message}", isLoading = false
             )
         }
     }

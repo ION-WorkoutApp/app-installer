@@ -64,6 +64,8 @@ fun uninstallExisting(context: Context, packageName: String) {
             data = Uri.parse("package:$packageName")
             putExtra(Intent.EXTRA_RETURN_RESULT, true)
         }
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
         context.startActivity(intent)
     } catch (e: PackageManager.NameNotFoundException) {
         throw IOException("Application not installed")

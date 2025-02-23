@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.ion606.installer.ui.MainScreen
 
 data class PermissionState(
     val hasManageExternalStorage: Boolean,

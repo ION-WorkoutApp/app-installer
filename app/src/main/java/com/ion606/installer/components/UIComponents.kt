@@ -1,6 +1,7 @@
 package com.ion606.installer.components
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -108,6 +109,8 @@ fun InstallSection(uiState: InstallerUiState, viewModel: InstallerViewModel) {
             uiState.isInstalled -> "Reinstall"
             else -> "Install Now"
         }
+
+        Log.d("AAAAAAAAAAAAAAA", "$uiState")
 
         Button(
             onClick = { viewModel.handleInstall() },

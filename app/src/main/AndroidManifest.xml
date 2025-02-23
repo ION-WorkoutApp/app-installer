@@ -13,6 +13,10 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <queries>
+        <package android:name="com.ion606.workoutapp" />
+        <package android:name="com.ion606.workoutapp.debug" />
+    </queries>
 
     <application
         android:allowBackup="true"
